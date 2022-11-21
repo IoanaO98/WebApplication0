@@ -9,7 +9,7 @@ using WebApplication0.Models;
 
 namespace WebApplication0.Controllers
 {
-    [Route("api/[ToDoItems]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class ToDoItemsController : ControllerBase
     {
@@ -27,6 +27,14 @@ namespace WebApplication0.Controllers
             return await _context.ToDoItems.ToListAsync();
         }
 
+        [HttpGet("{id},{nameUser}")]
+        public string GetToDoItems(int id, string nameUser)
+        {
+            char[] charArray = nameUser.ToCharArray();
+            Array.Reverse(charArray);
+            return new string(charArray);
+        }
+
         // GET: api/ToDoItems/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ToDoItems>> GetToDoItems(long id)
@@ -40,7 +48,6 @@ namespace WebApplication0.Controllers
 
             return toDoItems;
         }
-
         // PUT: api/ToDoItems/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
