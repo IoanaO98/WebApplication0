@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Packaging.Signing;
 using WebApplication0.Models;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace WebApplication0.Controllers
 {
@@ -14,6 +18,8 @@ namespace WebApplication0.Controllers
     public class ToDoItemsController : ControllerBase
     {
         private readonly ToDoContext _context;
+
+        public object Evironment { get; private set; }
 
         public ToDoItemsController(ToDoContext context)
         {
@@ -88,6 +94,39 @@ namespace WebApplication0.Controllers
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetToDoItems), new { id = toDoItems.Id }, toDoItems);
+        }
+
+        [HttpPost("{id},{text}")]
+        public string PostStringVocals(int id, string text)
+        {
+            var vowels = "aeiou";
+            var result = "";
+            foreach (char c in text)
+            {
+                if (vowels.Contains(c))
+                {
+                    result += c;
+                }
+            }
+            return result;
+        }
+
+        [HttpGet("{id},{txt}")]
+        public string GetUniqueWordsCount( int id, string txt)
+        {
+            txt = " ";
+            string input = txt;
+            var worddistinct = input.Split(null);
+            string[] strArr = worddistinct.ToArray();
+            string[] StrDis = strArr.Distinct().ToArray();
+
+            int myCount = 0;
+            foreach (string str in StrDis) 
+            {
+                myCount =( from x1 in strArr where x1.ToString() == str select x1).Count();
+                txt += str + myCount;
+            }
+            return txt;
         }
 
         // DELETE: api/ToDoItems/5
