@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
-using NuGet.Packaging.Signing;
+using System.Linq;
+using System.Text.RegularExpressions;
 using WebApplication0.Models;
-using static System.Net.Mime.MediaTypeNames;
+using System.IO;
+using System;
+using System.Net;
+using System.Net.Mime;
 
 namespace WebApplication0.Controllers
 {
@@ -18,8 +17,7 @@ namespace WebApplication0.Controllers
     public class ToDoItemsController : ControllerBase
     {
         private readonly ToDoContext _context;
-
-        public object Evironment { get; private set; }
+        static readonly HttpClient client = new HttpClient();
 
         public ToDoItemsController(ToDoContext context)
         {
@@ -33,7 +31,7 @@ namespace WebApplication0.Controllers
             return await _context.ToDoItems.ToListAsync();
         }
 
-        [HttpGet("{id},{nameUser}")]
+        [HttpGet("stringReverse/{id},{nameUser}")]
         public string GetToDoItems(int id, string nameUser)
         {
             char[] charArray = nameUser.ToCharArray();
@@ -54,6 +52,17 @@ namespace WebApplication0.Controllers
 
             return toDoItems;
         }
+
+        [HttpGet("DownloadFile/{fileName}")]
+        public async Task<ActionResult> DownloadFile(string url)
+        {
+            
+            using HttpResponseMessage response = await client.GetAsync(url);
+            string imageBody = await response.Content.ReadAsStringAsync();
+            byte[] result = await response.Content.ReadAsByteArrayAsync();
+            return File( result, "image/jpg");
+        }
+        
         // PUT: api/ToDoItems/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
@@ -96,7 +105,7 @@ namespace WebApplication0.Controllers
             return CreatedAtAction(nameof(GetToDoItems), new { id = toDoItems.Id }, toDoItems);
         }
 
-        [HttpPost("{id},{text}")]
+        [HttpPost("extractVocals/{id},{text}")]
         public string PostStringVocals(int id, string text)
         {
             var vowels = "aeiou";
@@ -111,22 +120,40 @@ namespace WebApplication0.Controllers
             return result;
         }
 
-        [HttpGet("{id},{txt}")]
-        public string GetUniqueWordsCount( int id, string txt)
+        [HttpGet("DistinctWords/{id},{txt}")]
+        public string GetUniqueWordsCount(int id, string txt)
         {
-            txt = " ";
-            string input = txt;
-            var worddistinct = input.Split(null);
-            string[] strArr = worddistinct.ToArray();
-            string[] StrDis = strArr.Distinct().ToArray();
+            txt = new Regex("[^a-zA-Z0-9]").Replace(txt, " ");
+            string[] words = txt.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
-            int myCount = 0;
-            foreach (string str in StrDis) 
+
+            var dublicateWords = 0;
+            for (var i = 0; i < words.Length; i++)
             {
-                myCount =( from x1 in strArr where x1.ToString() == str select x1).Count();
-                txt += str + myCount;
+                var wordFound = 0;
+                foreach(var word in words)
+                {
+                    if (words[i] == word)
+                    {
+                        wordFound++;
+                    }
+
+                }
+     
+                if (wordFound < 2)
+                {
+
+                    dublicateWords++;
+                }
             }
-            return txt;
+
+
+            var matchQuery = from word in words
+                             where word.Equals(txt, StringComparison.InvariantCultureIgnoreCase)
+                             select word;
+            int wordCount = matchQuery.Count();
+            return "{0} occurrences(s) of the search term \"{1}\" were found." + wordCount + txt + " " + dublicateWords;
+
         }
 
         // DELETE: api/ToDoItems/5

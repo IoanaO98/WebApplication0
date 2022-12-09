@@ -8,9 +8,9 @@
         public string? Str { get; set; }
   
     }
-    internal class Word
-    {
-        public string charchter { get; set; }
-        public int repeat { get; set; }
-    }
+    //internal class Word
+    //{
+    //    public string charchter { get; set; }
+    //    public int repeat { get; set; }
+    //}
 }
