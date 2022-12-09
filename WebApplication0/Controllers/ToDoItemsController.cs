@@ -140,19 +140,18 @@ namespace WebApplication0.Controllers
 
                 }
      
-                if (wordFound < 2)
+                if (wordFound >= 2)
                 {
 
                     dublicateWords++;
                 }
             }
-
-
             var matchQuery = from word in words
                              where word.Equals(txt, StringComparison.InvariantCultureIgnoreCase)
                              select word;
             int wordCount = matchQuery.Count();
-            return "{0} occurrences(s) of the search term \"{1}\" were found." + wordCount + txt + " " + dublicateWords;
+            return "In String: " + txt + " there are " + dublicateWords + " duplicates.";
+            
 
         }
 
